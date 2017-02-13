@@ -14,21 +14,23 @@ RUN apt-get update -y && \
   netcat \
   unzip
 
-# Install gvm
-RUN curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash && \
-  source "$HOME/.gvm/scripts/gvm" && \
-  source "$HOME/.bashrc" && \
-  gvm listall && \
-  gvm install go1.4 && \
-  gvm use go1.4 && \
-  export GOROOT_BOOTSTRAP=$GOROOT && \
-  gvm install go1.6.2 && \
-  gvm use go1.6.2 --default && \
-  mkdir $GOPATH/bin && \
-  curl https://glide.sh/get | sh
+# Install golang
+ENV GOLANG_VERSION 1.6.2
+ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
+ENV GOLANG_DOWNLOAD_SHA256 e40c36ae71756198478624ed1bb4ce17597b3c19d243f3f0899bb5740d56212a
 
-RUN echo 'alias ls="ls --color=auto"' >> ~/.bashrc
-RUN echo 'alias ll="ls -halF"' >> ~/.bashrc
+RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
+    && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
+    && tar -C /usr/local -xzf golang.tar.gz \
+    && rm golang.tar.gz
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+WORKDIR $GOPATH
+
+COPY go-wrapper /usr/local/bin/
 
 # Google App Engine
 RUN wget -O appengine.zip https://storage.googleapis.com/appengine-sdks/featured/go_appengine_sdk_linux_amd64-1.9.40.zip
