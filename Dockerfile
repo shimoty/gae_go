@@ -34,3 +34,4 @@ RUN echo 'alias ll="ls -halF"' >> ~/.bashrc
 RUN wget -O appengine.zip https://storage.googleapis.com/appengine-sdks/featured/go_appengine_sdk_linux_amd64-1.9.40.zip
 RUN unzip -q appengine.zip -d /appengine && \ 
   rm -f appengine.zip
+ENV PATH /appengine/go_appengine:$PATH
